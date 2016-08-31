@@ -26,6 +26,18 @@ UNPORTED_TESTS=					\
 	dispatch_vm					\
 	dispatch_vnode
 
+# Tests that have been disabled as they dont' reliably
+# pass or fail (so can't succeed, or run as XFAIL tests)
+DISABLED_TESTS=					\
+	dispatch_priority			\
+	dispatch_priority2			\
+	dispatch_read				\
+	dispatch_read2				\
+	dispatch_pingpong			\
+	dispatch_drift				\
+	dispatch_cascade			\
+	dispatch_io
+
 TESTS=							\
 	dispatch_apply				\
 	dispatch_api				\
@@ -34,14 +46,8 @@ TESTS=							\
 	dispatch_queue_finalizer	\
 	dispatch_group				\
 	dispatch_overcommit			\
-	dispatch_pingpong			\
 	dispatch_plusplus			\
-	dispatch_priority			\
-	dispatch_priority2			\
-	dispatch_concur				\
 	dispatch_context_for_key	\
-	dispatch_read				\
-	dispatch_read2				\
 	dispatch_after				\
 	dispatch_timer				\
 	dispatch_timer_short		\
@@ -52,17 +58,15 @@ TESTS=							\
 	dispatch_timer_bit63		\
 	dispatch_timer_set_time		\
 	dispatch_starfish			\
-	dispatch_cascade			\
-	dispatch_drift				\
-	dispatch_readsync			\
 	dispatch_data				\
-	dispatch_io					\
 	dispatch_io_net				\
 	dispatch_select
 
 # List tests that are expected to fail here.
 # Currently dispatch_concur fails occasionally, but passes more often than fails. 
-XFAIL_TESTS =
+XFAIL_TESTS =					\
+	dispatch_concur				\
+	dispatch_readsync
 
 ORIGINAL_LIST_OF_TESTS=			\
 	dispatch_apply				\
@@ -115,10 +119,20 @@ AM_OBJCFLAGS=$(DISPATCH_TESTS_CFLAGS) $(CBLOCKS_FLAGS)
 AM_CXXFLAGS=$(DISPATCH_TESTS_CFLAGS) $(CXXBLOCKS_FLAGS) $(BSD_OVERLAY_CFLAGS)
 AM_OBJCXXFLAGS=$(DISPATCH_TESTS_CFLAGS) $(CXXBLOCKS_FLAGS)
 
+if BUILD_OWN_KQUEUES
+  KQUEUE_LIBS+=$(top_builddir)/libkqueue/libkqueue.la
+  KQUEUE_CFLAGS+=-I$(top_srcdir)/libkqueue/include
+endif
+
 if !BUILD_OWN_PTHREAD_WORKQUEUES
 if HAVE_PTHREAD_WORKQUEUES
   PTHREAD_WORKQUEUE_LIBS=-lpthread_workqueue
 endif
+endif
+
+if BUILD_OWN_BLOCKS_RUNTIME
+CBLOCKS_FLAGS+= -I$(top_srcdir)/src/BlocksRuntime
+CXXBLOCKS_FLAGS+= -I$(top_srcdir)/src/BlocksRuntime
 endif
 
 if HAVE_SWIFT

@@ -60,11 +60,19 @@ EXTRA_libdispatch_la_DEPENDENCIES=
 AM_CPPFLAGS=-I$(top_builddir) -I$(top_srcdir) -I$(top_srcdir)/private
 
 DISPATCH_CFLAGS=-Wall $(VISIBILITY_FLAGS) $(OMIT_LEAF_FP_FLAGS) \
-	$(MARCH_FLAGS) $(KQUEUE_CFLAGS) $(BSD_OVERLAY_CFLAGS)
-AM_CFLAGS= $(PTHREAD_WORKQUEUE_CFLAGS) $(DISPATCH_CFLAGS) $(CBLOCKS_FLAGS)
+	$(MARCH_FLAGS) $(BSD_OVERLAY_CFLAGS)
+if DISPATCH_ENABLE_ASSERTS
+DISPATCH_CFLAGS+=-DDISPATCH_DEBUG=1
+endif
+AM_CFLAGS= $(KQUEUE_CFLAGS) $(PTHREAD_WORKQUEUE_CFLAGS) $(DISPATCH_CFLAGS) $(CBLOCKS_FLAGS)
 AM_OBJCFLAGS=$(DISPATCH_CFLAGS) $(CBLOCKS_FLAGS)
-AM_CXXFLAGS=$(PTHREAD_WORKQUEUE_CFLAGS) $(DISPATCH_CFLAGS) $(CXXBLOCKS_FLAGS)
+AM_CXXFLAGS=$(KQUEUE_CFLAGS) $(PTHREAD_WORKQUEUE_CFLAGS) $(DISPATCH_CFLAGS) $(CXXBLOCKS_FLAGS)
 AM_OBJCXXFLAGS=$(DISPATCH_CFLAGS) $(CXXBLOCKS_FLAGS)
+
+if BUILD_OWN_KQUEUES
+  KQUEUE_LIBS+=$(top_builddir)/libkqueue/libkqueue.la
+  KQUEUE_CFLAGS+=-I$(top_srcdir)/libkqueue/include
+endif
 
 if BUILD_OWN_PTHREAD_WORKQUEUES
   PTHREAD_WORKQUEUE_LIBS=$(top_builddir)/libpwq/libpthread_workqueue.la
@@ -75,8 +83,15 @@ if HAVE_PTHREAD_WORKQUEUES
 endif
 endif
 
+if BUILD_OWN_BLOCKS_RUNTIME
+libdispatch_la_SOURCES+= BlocksRuntime/data.c BlocksRuntime/runtime.c
+CBLOCKS_FLAGS+= -I$(top_srcdir)/src/BlocksRuntime
+CXXBLOCKS_FLAGS+= -I$(top_srcdir)/src/BlocksRuntime
+BLOCKS_RUNTIME_LIBS=-ldl
+endif
+
 libdispatch_la_LDFLAGS=-avoid-version
-libdispatch_la_LIBADD=$(KQUEUE_LIBS) $(PTHREAD_WORKQUEUE_LIBS) $(BSD_OVERLAY_LIBS)
+libdispatch_la_LIBADD=$(KQUEUE_LIBS) $(PTHREAD_WORKQUEUE_LIBS) $(BSD_OVERLAY_LIBS) $(BLOCKS_RUNTIME_LIBS)
 
 if HAVE_DARWIN_LD
 libdispatch_la_LDFLAGS+=-Wl,-compatibility_version,1 \
@@ -150,6 +165,9 @@ SWIFT_GEN_FILES=	\
 	$(SWIFT_OBJ_FILES:%=%.~partial.swiftdeps)
 
 SWIFTC_FLAGS = -Xcc -fmodule-map-file=$(abs_top_srcdir)/dispatch/module.modulemap -I$(abs_top_srcdir) -Xcc -fblocks
+if DISPATCH_ENABLE_OPTIMIZATION
+SWIFTC_FLAGS+=-O
+endif
 
 $(abs_builddir)/swift/%.o:	$(abs_srcdir)/swift/%.swift
 	$(SWIFTC) -frontend -c $(SWIFT_ABS_SRC_FILES) -primary-file $< \

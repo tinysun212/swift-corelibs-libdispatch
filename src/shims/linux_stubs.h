@@ -47,8 +47,6 @@ typedef uint32_t voucher_activity_trace_id_t;
 
 typedef uint32_t voucher_activity_id_t;
 
-typedef uint32_t _voucher_activity_buffer_hook_t;;
-
 typedef uint32_t voucher_activity_flag_t;
 
 typedef struct { } mach_msg_header_t;
@@ -82,10 +80,13 @@ typedef void (*dispatch_mach_msg_destructor_t)(void*);
 
 #define IGNORE_KEVENT64_EXT   /* will force the kevent64_s.ext[] to not be used -> leeway ignored */
 
+#ifndef NOTE_SECONDS
 #define NOTE_SECONDS	0x01
 #define NOTE_USECONDS	0x02
 #define NOTE_NSECONDS	0x04
 #define NOTE_ABSOLUTE	0x08
+#define KEVENT_NSEC_NOT_SUPPORTED
+#endif
 #define NOTE_CRITICAL	0x10
 #define NOTE_BACKGROUND	0x20
 #define NOTE_LEEWAY	0x40
