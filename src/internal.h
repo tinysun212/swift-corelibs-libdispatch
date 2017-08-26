@@ -250,6 +250,7 @@ DISPATCH_EXPORT DISPATCH_NOTHROW void dispatch_atfork_child(void);
 #include <sys/queue.h>
 #ifdef __ANDROID__
 #include <linux/sysctl.h>
+#elif defined(__CYGWIN__)
 #else
 #include <sys/sysctl.h>
 #endif /* __ANDROID__ */

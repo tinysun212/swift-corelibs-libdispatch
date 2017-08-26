@@ -21,7 +21,9 @@
 #ifndef __OS_VOUCHER_PRIVATE__
 #define __OS_VOUCHER_PRIVATE__
 
-#ifndef __linux__
+#ifdef __linux__
+#elif defined(__CYGWIN__)
+#else
 #include <os/base.h>
 #include <os/availability.h>
 #endif
