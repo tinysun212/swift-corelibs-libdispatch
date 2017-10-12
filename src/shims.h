@@ -31,6 +31,9 @@
 #ifdef __linux__
 #include "shims/linux_stubs.h"
 #endif
+#if defined(__CYGWIN__)
+#include "shims/linux_stubs.h"
+#endif
 
 #ifdef __ANDROID__
 #include "shims/android_stubs.h"

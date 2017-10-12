@@ -227,7 +227,7 @@ DISPATCH_EXPORT DISPATCH_MALLOC DISPATCH_RETURNS_RETAINED DISPATCH_WARN_RESULT
 DISPATCH_NOTHROW
 dispatch_queue_t
 dispatch_pthread_root_queue_create(const char *_Nullable label,
-	unsigned long flags, const pthread_attr_t *_Nullable attr,
+	unsigned long flags, const _Nullable pthread_attr_t *_Nullable attr,
 	dispatch_block_t _Nullable configure);
 
 /*!

@@ -87,13 +87,17 @@ _dispatch_lock_has_failed_trylock(dispatch_lock lock_value)
 	return !(lock_value & DLOCK_NOFAILED_TRYLOCK_BIT);
 }
 
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__CYGWIN__)
+#if defined(__linux__)
 #include <linux/futex.h>
+#endif
 #if !defined(__x86_64__) && !defined(__i386__) && !defined(__s390x__)
 #include <linux/membarrier.h>
 #endif
 #include <unistd.h>
+#if defined(__linux__)
 #include <sys/syscall.h>   /* For SYS_xxx definitions */
+#endif
 
 typedef uint32_t dispatch_lock;
 typedef pid_t dispatch_lock_owner;
